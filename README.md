@@ -6,6 +6,10 @@ Password and username generator
 Download: [releases page](https://github.com/saihon/pwg/releases)
 
 <br/>
+
+[![Build Status](https://travis-ci.org/saihon/pwg.svg?branch=master)](https://travis-ci.org/saihon/pwg)
+
+<br/>
 <br/>
 
 ## example
@@ -113,3 +117,6 @@ Download: [releases page](https://github.com/saihon/pwg/releases)
 ```
     $ pwg username -r -g 100 | grep ^a
 ```
+
+<br/>
+<br/>
