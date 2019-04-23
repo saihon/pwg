@@ -58,15 +58,8 @@ func (p *password) Username(m data.RelativeFrequency, length int) []byte {
 			max := mm[0][0][mf]
 
 			if max > 0 {
-				// baseline
 				r := rand.Intn(max)
-
-				// append characters greater than or equal
-				// the baseline to the slice as a seed
-				// v[0] char code
-				// v[1] score
-				v := m[key]
-				for _, vv := range v[1] {
+				for _, vv := range mm[1] {
 					if vv[mf] == 0 || vv[mf] < r {
 						continue
 					}
