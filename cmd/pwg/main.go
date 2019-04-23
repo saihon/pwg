@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	Name     = "pwg"
-	Version  = "v0.0.1"
+	Name     string
+	Version  string
 	options  *pwg.Options
 	flagUser *flag.FlagSet
 )
