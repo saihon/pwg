@@ -6,6 +6,11 @@ import (
 	"github.com/saihon/pwg/data"
 )
 
+var (
+	Vowel     = []byte{'a', 'e', 'i', 'o', 'u'}
+	Consonant = []byte{'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'w', 'x', 'y', 'z'}
+)
+
 func isvowel(n int) bool {
 	switch n {
 	case 97, 101, 105, 111, 117:
@@ -28,42 +33,54 @@ func (p *password) Username(m data.RelativeFrequency, length int) []byte {
 	a[0] = byte(rand.Intn(123-97) + 97)
 
 	for i := 1; i < length; i++ {
+		var seed []byte
 		key := int(a[i-1])
 
-		// most frequent
-		mf := 0
-		switch {
-		case i == length-1:
-			mf = 3
-		case i > 1:
-			if isvowel(int(a[i-2])) {
-				mf = 1
-			} else {
-				mf = 2
-			}
+		var ok bool
+		var mm [][][]int
+		if m != nil {
+			mm, ok = m[key]
 		}
-		max := m[key][0][0][mf]
 
-		var seed []byte
-		if max > 0 {
-			// baseline
-			r := rand.Intn(max)
-
-			// append characters greater than or equal
-			// the baseline to the slice as a seed
-			// v[0] char code
-			// v[1] score
-			v := m[key]
-			for _, vv := range v[1] {
-				if vv[mf] == 0 || vv[mf] < r {
-					continue
+		if ok && len(mm) > 1 && len(mm[0]) > 0 && len(mm[0][0]) == 4 {
+			// most frequent index
+			mf := 0
+			switch {
+			case i == length-1:
+				mf = 3
+			case i > 1:
+				if isvowel(int(a[i-2])) {
+					mf = 1
+				} else {
+					mf = 2
 				}
-				seed = append(seed, byte(vv[4]))
+			}
+			max := mm[0][0][mf]
+
+			if max > 0 {
+				// baseline
+				r := rand.Intn(max)
+
+				// append characters greater than or equal
+				// the baseline to the slice as a seed
+				// v[0] char code
+				// v[1] score
+				v := m[key]
+				for _, vv := range v[1] {
+					if vv[mf] == 0 || vv[mf] < r {
+						continue
+					}
+					seed = append(seed, byte(vv[4]))
+				}
 			}
 		}
 
 		if len(seed) == 0 {
-			seed = []byte("abcdefghijklmnopqrstuvwxyz")
+			if isvowel(key) {
+				seed = Consonant
+			} else {
+				seed = Vowel
+			}
 		}
 
 		n := 0
