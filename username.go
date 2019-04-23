@@ -29,6 +29,7 @@ func (p *password) Username(m data.RelativeFrequency, length int) []byte {
 
 	for i := 1; i < length; i++ {
 		key := int(a[i-1])
+
 		// most frequent
 		mf := 0
 		switch {
@@ -65,22 +66,17 @@ func (p *password) Username(m data.RelativeFrequency, length int) []byte {
 			seed = []byte("abcdefghijklmnopqrstuvwxyz")
 		}
 
-		again := 0
+		n := 0
 	Again:
-		again++
 		c := byte(seed[rand.Intn(len(seed))])
 
-		// if the same letter continues first, try again
-		if i == 1 && a[i-1] == c {
-			if again < 5 {
-				goto Again
-			}
-		}
-
 		// if the same letter continues three times, try again
-		if i-2 >= 0 && a[i-1] == c && a[i-2] == c {
-			if again < 5 {
-				goto Again
+		if len(seed) > 1 && i-2 >= 0 {
+			if a[i-1] == c && a[i-2] == c {
+				if n < 3 {
+					n++
+					goto Again
+				}
 			}
 		}
 
