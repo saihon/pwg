@@ -1,9 +1,8 @@
 package pwg
 
 import (
-	"time"
-
-	mrand "math/rand"
+	"crypto/rand"
+	"math/big"
 )
 
 var instance *password
@@ -11,13 +10,14 @@ var instance *password
 type password struct {
 	options *Options
 	letters []string
+	max     *big.Int
 }
 
 // New new struct passowrd. rand.Seed runs only once
 func New(o *Options) *password {
 	if instance == nil {
-		mrand.Seed(time.Now().UnixNano())
 		instance = new(password)
+		instance.max = new(big.Int)
 	}
 	instance.options = o
 	return instance.Init()
@@ -85,15 +85,19 @@ func (p *password) Generate() []byte {
 					size++
 				}
 			} else {
-				size = mrand.Intn((p.options.Length-adds-i)-1) + 1
+				p.max.SetInt64(int64((p.options.Length - adds - i) - 1))
+				r, _ := rand.Int(rand.Reader, p.max)
+				size = int(r.Int64() + 1)
 			}
 			adds += size
 		} else {
 			size = p.options.Length - adds
 		}
 
+		p.max.SetInt64(int64(len(p.letters[i])))
 		for j := 0; j < size; j++ {
-			b[index] = p.letters[i][mrand.Intn(len(p.letters[i]))]
+			r, _ := rand.Int(rand.Reader, p.max)
+			b[index] = p.letters[i][r.Int64()]
 			index++
 		}
 	}
@@ -101,16 +105,19 @@ func (p *password) Generate() []byte {
 }
 
 // Shuffle wrapped rand.Shuffle
-func Shuffle(b []byte) {
-	mrand.Shuffle(len(b), func(i, j int) {
+func (p *password) Shuffle(b []byte) {
+	p.max.SetInt64(int64(len(b)))
+	for i := 0; i < len(b); i++ {
+		r, _ := rand.Int(rand.Reader, p.max)
+		j := r.Int64()
 		b[i], b[j] = b[j], b[i]
-	})
+	}
 }
 
 func (p *password) gen(ch chan<- []byte) {
 	for i := 0; i < p.options.Generate; i++ {
 		b := p.Generate()
-		Shuffle(b)
+		p.Shuffle(b)
 		ch <- b
 	}
 	close(ch)

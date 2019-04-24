@@ -1,6 +1,7 @@
 package pwg
 
 import (
+	"math/big"
 	"math/rand"
 	"reflect"
 	"regexp"
@@ -140,7 +141,10 @@ func TestGenerate(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 
 	for i, v := range data {
-		p := (&password{options: v.options}).Init()
+		p := (&password{
+			options: v.options,
+			max:     new(big.Int),
+		}).Init()
 		b := p.Generate()
 
 		if !v.re.Match(b) {
@@ -230,7 +234,11 @@ func TestEvenly(t *testing.T) {
 
 	for i, v := range data {
 		v.options.Evenly = true
-		p := (&password{options: v.options}).Init()
+		p := (&password{
+			options: v.options,
+			max:     new(big.Int),
+		}).Init()
+
 		b := p.Generate()
 		c := counter(b)
 		if !reflect.DeepEqual(c, v.count) {

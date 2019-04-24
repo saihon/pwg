@@ -1,6 +1,7 @@
 package pwg
 
 import (
+	"math/big"
 	"testing"
 
 	rf "github.com/saihon/pwg/data"
@@ -9,6 +10,7 @@ import (
 func TestUsername(t *testing.T) {
 	p := &password{
 		options: new(Options),
+		max:     new(big.Int),
 	}
 
 	data := []struct {

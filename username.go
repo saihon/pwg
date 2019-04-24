@@ -1,7 +1,7 @@
 package pwg
 
 import (
-	"math/rand"
+	"crypto/rand"
 
 	"github.com/saihon/pwg/data"
 )
@@ -22,7 +22,9 @@ func isvowel(n int) bool {
 // Username
 func (p *password) Username(m data.RelativeFrequency, length int) []byte {
 	if p.options.Random {
-		length = rand.Intn(10-5) + 5
+		p.max.SetInt64(10 - 5)
+		r, _ := rand.Int(rand.Reader, p.max)
+		length = int(r.Int64() + 5)
 	}
 
 	if length < 1 {
@@ -30,7 +32,9 @@ func (p *password) Username(m data.RelativeFrequency, length int) []byte {
 	}
 
 	a := make([]byte, length, length)
-	a[0] = byte(rand.Intn(123-97) + 97)
+	p.max.SetInt64(123 - 97)
+	r, _ := rand.Int(rand.Reader, p.max)
+	a[0] = byte(int(r.Int64() + 97))
 
 	for i := 1; i < length; i++ {
 		var seed []byte
@@ -58,9 +62,11 @@ func (p *password) Username(m data.RelativeFrequency, length int) []byte {
 			max := mm[0][0][mf]
 
 			if max > 0 {
-				r := rand.Intn(max)
+				p.max.SetInt64(int64(max))
+				r, _ := rand.Int(rand.Reader, p.max)
+				n := int(r.Int64())
 				for _, vv := range mm[1] {
-					if vv[mf] == 0 || vv[mf] < r {
+					if vv[mf] == 0 || vv[mf] < n {
 						continue
 					}
 					seed = append(seed, byte(vv[4]))
@@ -78,7 +84,9 @@ func (p *password) Username(m data.RelativeFrequency, length int) []byte {
 
 		n := 0
 	Again:
-		c := byte(seed[rand.Intn(len(seed))])
+		p.max.SetInt64(int64(len(seed)))
+		r, _ := rand.Int(rand.Reader, p.max)
+		c := byte(seed[int(r.Int64())])
 
 		// if the same letter continues three times, try again
 		if len(seed) > 1 && i-2 >= 0 {
